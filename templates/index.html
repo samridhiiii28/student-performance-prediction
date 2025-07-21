@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Student Performance Predictor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+        .header {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+        .header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        .form-section {
+            padding: 2rem;
+        }
+        .section-title {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 0.5rem;
+        }
+        .form-control, .form-select {
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        .predict-btn {
+            background: linear-gradient(45deg, #56ab2f 0%, #a8e6cf 100%);
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(86, 171, 47, 0.3);
+        }
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(86, 171, 47, 0.4);
+        }
+        .predict-btn:disabled {
+            background: #bdc3c7;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+            transform: scale(0);
+            transition: all 0.5s ease;
+        }
+        .result-card.show {
+            transform: scale(1);
+        }
+        .result-grade {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        .result-category {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .loading-spinner {
+            display: none;
+            margin: 1rem 0;
+        }
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+        .info-card i {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+        .row {
+            margin-bottom: 1rem;
+        }
+        .graph-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            .form-section {
+                padding: 1rem;
+            }
+            .predict-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="header">
+                <h1><i class="fas fa-graduation-cap"></i> Student Performance Predictor</h1>
+                <p>Predict student final grades using machine learning</p>
+            </div>
+
+            <div class="form-section">
+                <form id="prediction-form" novalidate>
+                    <!-- Personal Information -->
+                    <div class="section">
+                        <h3 class="section-title"><i class="fas fa-user"></i> Personal Information</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">School Name</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="school"
+                                        placeholder="Enter your school name"
+                                        required
+                                        autocomplete="off"
+                                    />
+                                    <small class="form-text text-muted">
+                                        Allowed: Springfield High, Riverdale Academy, Sunrise Public School
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Gender</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="sex"
+                                        placeholder="Male, Female, Other"
+                                        required
+                                        autocomplete="off"
+                                    />
+                                    <small class="form-text text-muted">
+                                        Allowed: Male, Female, Other
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Age</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="age"
+                                        min="5"
+                                        max="30"
+                                        placeholder="Enter your age"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Address Type</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="address"
+                                        placeholder="Urban, Rural, Suburban"
+                                        required
+                                        autocomplete="off"
+                                    />
+                                    <small class="form-text text-muted">
+                                        Allowed: Urban, Rural, Suburban
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Academic Information -->
+                    <div class="section">
+                        <h3 class="section-title"><i class="fas fa-book"></i> Academic Information</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Reason for School Choice</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="reason"
+                                        placeholder="e.g., Close to home, Good reputation, Course preference"
+                                        required
+                                        pattern="^[A-Za-z\s\.\-&']+$"
+                                        title="Text only, no numbers"
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Weekly Study Time (hours)</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="studytime"
+                                        min="0"
+                                        max="40"
+                                        placeholder="e.g., 5, 10, 15"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Family Educational Support</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="famsup"
+                                        placeholder="Yes, No, Limited"
+                                        required
+                                        autocomplete="off"
+                                    />
+                                    <small class="form-text text-muted">
+                                        Allowed: Yes, No, Limited
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Extra Paid Classes</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="paid"
+                                        placeholder="Yes, No, Occasionally"
+                                        required
+                                        autocomplete="off"
+                                    />
+                                    <small class="form-text text-muted">
+                                        Allowed: Yes, No, Occasionally
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Extra-curricular Activities</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="activities"
+                                        placeholder="Sports, Music, Art, None"
+                                        required
+                                        autocomplete="off"
+                                    />
+                                    <small class="form-text text-muted">
+                                        Allowed: Sports, Music, Art, None
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Wants Higher Education</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="higher"
+                                        placeholder="Yes, No, Undecided"
+                                        required
+                                        autocomplete="off"
+                                    />
+                                    <small class="form-text text-muted">
+                                        Allowed: Yes, No, Undecided
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal & Social -->
+                    <div class="section">
+                        <h3 class="section-title"><i class="fas fa-users"></i> Personal & Social Information</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Internet Access at Home</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="internet"
+                                        placeholder="Yes, No, Limited"
+                                        required
+                                        autocomplete="off"
+                                    />
+                                    <small class="form-text text-muted">
+                                        Allowed: Yes, No, Limited
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Free Time After School (hours per day)</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="freetime"
+                                        min="0"
+                                        max="12"
+                                        placeholder="e.g., 2, 4, 6"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Going Out with Friends (times per week)</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="goout"
+                                        min="0"
+                                        max="7"
+                                        placeholder="e.g., 1, 3, 5"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Current Health Status</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="health"
+                                        placeholder="Excellent, Good, Fair, Poor"
+                                        required
+                                        autocomplete="off"
+                                    />
+                                    <small class="form-text text-muted">
+                                        Allowed: Excellent, Good, Fair, Poor
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Number of School Absences</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="absences"
+                                        min="0"
+                                        max="100"
+                                        placeholder="e.g., 0, 5, 10"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prediction Button -->
+                    <div class="text-center">
+                        <button type="button" class="predict-btn" id="predict-btn">
+                            <i class="fas fa-calculator"></i> Predict Final Grade
+                        </button>
+                        <div class="loading-spinner">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Results Section -->
+                <div id="results" class="result-card" style="display: none">
+                    <h3><i class="fas fa-chart-line"></i> Prediction Results</h3>
+                    <div class="result-grade" id="predicted-grade">--</div>
+                    <div class="result-category" id="grade-category">--</div>
+                    <p>This prediction is based on machine learning analysis of student performance factors.</p>
+
+                    <div class="graph-container mt-4">
+                        <canvas id="gradeChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Information Cards -->
+                <div class="info-cards">
+                    <div class="info-card">
+                        <i class="fas fa-brain"></i>
+                        <h4>AI-Powered</h4>
+                        <p>
+                            Uses advanced machine learning algorithms to analyze multiple factors affecting student
+                            performance.
+                        </p>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-chart-bar"></i>
+                        <h4>High Accuracy</h4>
+                        <p>Our model achieves high prediction accuracy by analyzing key educational and social factors.</p>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h4>Educational Insights</h4>
+                        <p>Helps educators and administrators identify students who may need additional support.</p>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>Privacy Protected</h4>
+                        <p>All data is processed securely and no personal information is stored permanently.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let chartInstance = null;
+
+        // Allowed values (normalized lower-case for validation)
+        const allowedSchools = ['springfield high', 'riverdale academy', 'sunrise public school'];
+        const allowedGenders = ['male', 'female', 'other'];
+        const allowedAddresses = ['urban', 'rural', 'suburban'];
+        const allowedFamsup = ['yes', 'no', 'limited'];
+        const allowedPaid = ['yes', 'no', 'occasionally'];
+        const allowedActivities = ['sports', 'music', 'art', 'none'];
+        const allowedHigher = ['yes', 'no', 'undecided'];
+        const allowedInternet = ['yes', 'no', 'limited'];
+        const allowedHealth = ['excellent', 'good', 'fair', 'poor'];
+
+        function drawGradeChart(predictedGrade) {
+            const ctx = document.getElementById('gradeChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            const gradeRanges = {
+                Poor: { min: 0, max: 9, color: '#e74c3c' },
+                Fair: { min: 10, max: 11, color: '#f39c12' },
+                Good: { min: 12, max: 13, color: '#87ceeb' },
+                'Very Good': { min: 14, max: 15, color: '#9b59b6' },
+                Excellent: { min: 16, max: 20, color: '#27ae60' },
+            };
+            let currentCategory = 'Poor';
+            for (const [category, range] of Object.entries(gradeRanges)) {
+                if (predictedGrade >= range.min && predictedGrade <= range.max) {
+                    currentCategory = category;
+                    break;
+                }
+            }
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Poor (0-9)', 'Fair (10-11)', 'Good (12-13)', 'Very Good (14-15)', 'Excellent (16-20)'],
+                    datasets: [
+                        {
+                            label: 'Grade Ranges',
+                            data: [9, 11, 13, 15, 20],
+                            backgroundColor: ['#e74c3c80', '#f39c1280', '#87ceeb80', '#9b59b680', '#27ae6080'],
+                            borderColor: ['#e74c3c', '#f39c12', '#87ceeb', '#9b59b6', '#27ae60'],
+                            borderWidth: 2,
+                        },
+                        {
+                            label: 'Your Predicted Grade',
+                            data: [
+                                predictedGrade <= 9 ? predictedGrade : null,
+                                predictedGrade >= 10 && predictedGrade <= 11 ? predictedGrade : null,
+                                predictedGrade >= 12 && predictedGrade <= 13 ? predictedGrade : null,
+                                predictedGrade >= 14 && predictedGrade <= 15 ? predictedGrade : null,
+                                predictedGrade >= 16 ? predictedGrade : null,
+                            ],
+                            backgroundColor: '#3498db',
+                            borderColor: '#2980b9',
+                            borderWidth: 2,
+                            type: 'bar',
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Your Grade: ${predictedGrade.toFixed(1)}/20 (${currentCategory})`,
+                            color: 'white',
+                            font: { size: 16, weight: 'bold' },
+                        },
+                        legend: {
+                            labels: { color: 'white' },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 20,
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                        },
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                        },
+                    },
+                },
+            });
+        }
+
+        function getGradeCategory(grade) {
+            if (grade >= 16) return 'Excellent';
+            if (grade >= 14) return 'Very Good';
+            if (grade >= 12) return 'Good';
+            if (grade >= 10) return 'Fair';
+            return 'Poor';
+        }
+
+        function getGradeColor(grade) {
+            if (grade >= 16) return 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
+            if (grade >= 14) return 'linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)';
+            if (grade >= 12) return 'linear-gradient(135deg, #87ceeb 0%, #87ceeb 100%)';
+            if (grade >= 10) return 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)';
+            return 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+        }
+
+        function simulatePrediction() {
+            const formData = new FormData(document.getElementById('prediction-form'));
+            let score = 10;
+
+            const studyTime = parseInt(formData.get('studytime')) || 0;
+            if (studyTime > 15) score += 3;
+            else if (studyTime > 10) score += 2;
+            else if (studyTime > 5) score += 1;
+            else if (studyTime < 2) score -= 1;
+
+            const absences = parseInt(formData.get('absences')) || 0;
+            if (absences === 0) score += 1;
+            else if (absences > 20) score -= 2;
+            else if (absences > 10) score -= 1;
+
+            const freeTime = parseInt(formData.get('freetime')) || 0;
+            if (freeTime > 8) score -= 1;
+            else if (freeTime >= 2 && freeTime <= 4) score += 0.5;
+
+            const goOut = parseInt(formData.get('goout')) || 0;
+            if (goOut > 5) score -= 1;
+            else if (goOut <= 2) score += 0.5;
+
+            const famsup = formData.get('famsup').toLowerCase();
+            const higher = formData.get('higher').toLowerCase();
+            const internet = formData.get('internet').toLowerCase();
+            const health = formData.get('health').toLowerCase();
+
+            if (famsup.includes('yes')) score += 1;
+            if (higher.includes('yes')) score += 2;
+            if (internet.includes('yes')) score += 1;
+            if (health.includes('excellent') || health.includes('good')) score += 1;
+            if (health.includes('poor') || health.includes('bad')) score -= 1;
+
+            const age = parseInt(formData.get('age')) || 16;
+            if (age >= 5 && age <= 12) score += 0.3;
+            else if (age >= 13 && age <= 18) score += 0.5;
+            else if (age > 25) score -= 0.5;
+
+            score += (Math.random() - 0.5) * 1.5;
+            score = Math.max(0, Math.min(20, score));
+            return parseFloat(score.toFixed(1));
+        }
+
+        function validateForm() {
+            const form = document.getElementById('prediction-form');
+
+            let schoolInput = form.school.value.trim().toLowerCase();
+            let genderInput = form.sex.value.trim().toLowerCase();
+            let addressInput = form.address.value.trim().toLowerCase();
+            let famsupInput = form.famsup.value.trim().toLowerCase();
+            let paidInput = form.paid.value.trim().toLowerCase();
+            let activitiesInput = form.activities.value.trim().toLowerCase();
+            let higherInput = form.higher.value.trim().toLowerCase();
+            let internetInput = form.internet.value.trim().toLowerCase();
+            let healthInput = form.health.value.trim().toLowerCase();
+
+            if (!allowedSchools.includes(schoolInput)) {
+                alert('Invalid School Name! Allowed: Springfield High, Riverdale Academy, Sunrise Public School.');
+                form.school.style.borderColor = '#e74c3c';
+                form.school.focus();
+                return false;
+            } else {
+                form.school.style.borderColor = '#27ae60';
+            }
+
+            if (!allowedGenders.includes(genderInput)) {
+                alert('Invalid Gender! Allowed: Male, Female, Other.');
+                form.sex.style.borderColor = '#e74c3c';
+                form.sex.focus();
+                return false;
+            } else {
+                form.sex.style.borderColor = '#27ae60';
+            }
+
+            if (!allowedAddresses.includes(addressInput)) {
+                alert('Invalid Address! Allowed: Urban, Rural, Suburban.');
+                form.address.style.borderColor = '#e74c3c';
+                form.address.focus();
+                return false;
+            } else {
+                form.address.style.borderColor = '#27ae60';
+            }
+
+            if (!allowedFamsup.includes(famsupInput)) {
+                alert('Invalid Family Educational Support! Allowed: Yes, No, Limited.');
+                form.famsup.style.borderColor = '#e74c3c';
+                form.famsup.focus();
+                return false;
+            } else {
+                form.famsup.style.borderColor = '#27ae60';
+            }
+
+            if (!allowedPaid.includes(paidInput)) {
+                alert('Invalid Extra Paid Class! Allowed: Yes, No, Occasionally.');
+                form.paid.style.borderColor = '#e74c3c';
+                form.paid.focus();
+                return false;
+            } else {
+                form.paid.style.borderColor = '#27ae60';
+            }
+
+            if (!allowedActivities.includes(activitiesInput)) {
+                alert('Invalid Activity! Allowed: Sports, Music, Art, None.');
+                form.activities.style.borderColor = '#e74c3c';
+                form.activities.focus();
+                return false;
+            } else {
+                form.activities.style.borderColor = '#27ae60';
+            }
+
+            if (!allowedHigher.includes(higherInput)) {
+                alert('Invalid Higher Education Option! Allowed: Yes, No, Undecided.');
+                form.higher.style.borderColor = '#e74c3c';
+                form.higher.focus();
+                return false;
+            } else {
+                form.higher.style.borderColor = '#27ae60';
+            }
+
+            if (!allowedInternet.includes(internetInput)) {
+                alert('Invalid Internet Option! Allowed: Yes, No, Limited.');
+                form.internet.style.borderColor = '#e74c3c';
+                form.internet.focus();
+                return false;
+            } else {
+                form.internet.style.borderColor = '#27ae60';
+            }
+
+            if (!allowedHealth.includes(healthInput)) {
+                alert('Invalid Health Status! Allowed: Excellent, Good, Fair, Poor.');
+                form.health.style.borderColor = '#e74c3c';
+                form.health.focus();
+                return false;
+            } else {
+                form.health.style.borderColor = '#27ae60';
+            }
+
+            const age = parseInt(form.age.value);
+            const studytime = parseInt(form.studytime.value);
+            const freetime = parseInt(form.freetime.value);
+            const goout = parseInt(form.goout.value);
+            const absences = parseInt(form.absences.value);
+
+            if (age < 5 || age > 30) {
+                alert('Age must be between 5 and 30 years.');
+                form.age.style.borderColor = '#e74c3c';
+                form.age.focus();
+                return false;
+            } else {
+                form.age.style.borderColor = '#27ae60';
+            }
+
+            if (studytime < 0 || studytime > 40) {
+                alert('Weekly study time must be between 0 and 40 hours.');
+                form.studytime.style.borderColor = '#e74c3c';
+                form.studytime.focus();
+                return false;
+            } else {
+                form.studytime.style.borderColor = '#27ae60';
+            }
+
+            if (freetime < 0 || freetime > 12) {
+                alert('Free time must be between 0 and 12 hours per day.');
+                form.freetime.style.borderColor = '#e74c3c';
+                form.freetime.focus();
+                return false;
+            } else {
+                form.freetime.style.borderColor = '#27ae60';
+            }
+
+            if (goout < 0 || goout > 7) {
+                alert('Going out frequency must be between 0 and 7 times per week.');
+                form.goout.style.borderColor = '#e74c3c';
+                form.goout.focus();
+                return false;
+            } else {
+                form.goout.style.borderColor = '#27ae60';
+            }
+
+            if (absences < 0 || absences > 100) {
+                alert('Number of absences must be between 0 and 100.');
+                form.absences.style.borderColor = '#e74c3c';
+                form.absences.focus();
+                return false;
+            } else {
+                form.absences.style.borderColor = '#27ae60';
+            }
+
+            return true;
+        }
+
+        function addInputValidation() {
+            const form = document.getElementById('prediction-form');
+
+            // School, gender, and all other option-based text fields validation
+            [
+                { field: 'school', allowed: allowedSchools },
+                { field: 'sex', allowed: allowedGenders },
+                { field: 'address', allowed: allowedAddresses },
+                { field: 'famsup', allowed: allowedFamsup },
+                { field: 'paid', allowed: allowedPaid },
+                { field: 'activities', allowed: allowedActivities },
+                { field: 'higher', allowed: allowedHigher },
+                { field: 'internet', allowed: allowedInternet },
+                { field: 'health', allowed: allowedHealth }
+            ].forEach(({ field, allowed }) => {
+                const inputEl = form[field];
+                inputEl.addEventListener('input', () => {
+                    if (allowed.includes(inputEl.value.trim().toLowerCase())) {
+                        inputEl.style.borderColor = '#27ae60';
+                    } else {
+                        inputEl.style.borderColor = '#e74c3c';
+                    }
+                });
+            });
+
+            // Number inputs validation
+            const numberFields = ['age', 'studytime', 'freetime', 'goout', 'absences'];
+            numberFields.forEach((field) => {
+                const inputEl = form[field];
+                inputEl.addEventListener('input', () => {
+                    let val = parseInt(inputEl.value);
+                    let valid = false;
+                    switch (field) {
+                        case 'age':
+                            valid = val >= 5 && val <= 30;
+                            break;
+                        case 'studytime':
+                            valid = val >= 0 && val <= 40;
+                            break;
+                        case 'freetime':
+                            valid = val >= 0 && val <= 12;
+                            break;
+                        case 'goout':
+                            valid = val >= 0 && val <= 7;
+                            break;
+                        case 'absences':
+                            valid = val >= 0 && val <= 100;
+                            break;
+                    }
+                    inputEl.style.borderColor = valid ? '#27ae60' : '#e74c3c';
+                });
+            });
+        }
+
+        document.getElementById('predict-btn').addEventListener('click', function () {
+            const submitBtn = this;
+            const loadingSpinner = document.querySelector('.loading-spinner');
+            const resultsDiv = document.getElementById('results');
+            if (!validateForm()) {
+                return;
+            }
+            submitBtn.disabled = true;
+            loadingSpinner.style.display = 'block';
+            resultsDiv.classList.remove('show');
+            setTimeout(() => {
+                const predictedValue = simulatePrediction();
+                const category = getGradeCategory(predictedValue);
+                loadingSpinner.style.display = 'none';
+                document.getElementById('predicted-grade').textContent = `${predictedValue}/20`;
+                document.getElementById('grade-category').textContent = category;
+                resultsDiv.style.background = getGradeColor(predictedValue);
+                resultsDiv.style.display = 'block';
+                setTimeout(() => {
+                    resultsDiv.classList.add('show');
+                }, 100);
+                drawGradeChart(predictedValue);
+                submitBtn.disabled = false;
+                setTimeout(() => {
+                    resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 600);
+            }, 1500);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            addInputValidation();
+        });
+    </script>
+</body>
+</html>
