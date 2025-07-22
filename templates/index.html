@@ -178,7 +178,7 @@
                                         class="form-control"
                                         name="school"
                                         list="school-options"
-                                        placeholder="Enter your school name"
+                                        placeholder="e.g., Springfield High, Riverdale Academy, Sunrise Public School"
                                         required
                                         autocomplete="off"
                                     />
@@ -188,7 +188,7 @@
                                         <option value="Sunrise Public School">
                                     </datalist>
                                     <small class="form-text text-muted">
-                                        Allowed: Springfield High, Riverdale Academy, Sunrise Public School
+                                        Type any school name or select from the suggestions below.
                                     </small>
                                 </div>
                             </div>
@@ -210,7 +210,7 @@
                                         <option value="Other">
                                     </datalist>
                                     <small class="form-text text-muted">
-                                        Allowed: Male, Female, Other
+                                        Type any gender or select from the suggestions below.
                                     </small>
                                 </div>
                             </div>
@@ -248,7 +248,7 @@
                                         <option value="Suburban">
                                     </datalist>
                                     <small class="form-text text-muted">
-                                        Allowed: Urban, Rural, Suburban
+                                        Type any address type or select from the suggestions below.
                                     </small>
                                 </div>
                             </div>
@@ -266,18 +266,11 @@
                                         type="text"
                                         class="form-control"
                                         name="reason"
-                                        list="reason-options"
                                         placeholder="e.g., Close to home, Good reputation, Course preference"
                                         required
                                         pattern="^[A-Za-z\s\.\-&']+$"
                                         title="Text only, no numbers"
                                     />
-                                    <datalist id="reason-options">
-                                        <option value="Close to home">
-                                        <option value="Good reputation">
-                                        <option value="Course preference">
-                                        <option value="Other">
-                                    </datalist>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -314,7 +307,7 @@
                                         <option value="Limited">
                                     </datalist>
                                     <small class="form-text text-muted">
-                                        Allowed: Yes, No, Limited
+                                        Type any option or select from the suggestions below.
                                     </small>
                                 </div>
                             </div>
@@ -336,7 +329,7 @@
                                         <option value="Occasionally">
                                     </datalist>
                                     <small class="form-text text-muted">
-                                        Allowed: Yes, No, Occasionally
+                                        Type any option or select from the suggestions below.
                                     </small>
                                 </div>
                             </div>
@@ -361,7 +354,7 @@
                                         <option value="None">
                                     </datalist>
                                     <small class="form-text text-muted">
-                                        Allowed: Sports, Music, Art, None
+                                        Type any option or select from the suggestions below.
                                     </small>
                                 </div>
                             </div>
@@ -383,7 +376,7 @@
                                         <option value="Undecided">
                                     </datalist>
                                     <small class="form-text text-muted">
-                                        Allowed: Yes, No, Undecided
+                                        Type any option or select from the suggestions below.
                                     </small>
                                 </div>
                             </div>
@@ -409,10 +402,10 @@
                                     <datalist id="internet-options">
                                         <option value="Yes">
                                         <option value="No">
-                                        <option value="Limited">[]
+                                        <option value="Limited">
                                     </datalist>
                                     <small class="form-text text-muted">
-                                        Allowed: Yes, No, Limited
+                                        Type any option or select from the suggestions below.
                                     </small>
                                 </div>
                             </div>
@@ -465,7 +458,7 @@
                                         <option value="Poor">
                                     </datalist>
                                     <small class="form-text text-muted">
-                                        Allowed: Excellent, Good, Fair, Poor
+                                        Type any option or select from the suggestions below.
                                     </small>
                                 </div>
                             </div>
@@ -706,8 +699,9 @@
             let internetInput = form.internet.value.trim().toLowerCase();
             let healthInput = form.health.value.trim().toLowerCase();
 
-            if (!allowedSchools.includes(schoolInput)) {
-                alert('Invalid School Name! Allowed: Springfield High, Riverdale Academy, Sunrise Public School.');
+            // School Name: Accept any text value, do not restrict to allowedSchools
+            if (!schoolInput) {
+                alert('Please enter a School Name.');
                 form.school.style.borderColor = '#e74c3c';
                 form.school.focus();
                 return false;
@@ -844,9 +838,18 @@
         function addInputValidation() {
             const form = document.getElementById('prediction-form');
 
-            // School, gender, and all other option-based text fields validation
+            // School Name: accept any non-empty value
+            const schoolInputEl = form['school'];
+            schoolInputEl.addEventListener('input', () => {
+                if (schoolInputEl.value.trim()) {
+                    schoolInputEl.style.borderColor = '#27ae60';
+                } else {
+                    schoolInputEl.style.borderColor = '#e74c3c';
+                }
+            });
+
+            // Other option-based text fields validation
             [
-                { field: 'school', allowed: allowedSchools },
                 { field: 'sex', allowed: allowedGenders },
                 { field: 'address', allowed: allowedAddresses },
                 { field: 'famsup', allowed: allowedFamsup },
