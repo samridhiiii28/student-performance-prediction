@@ -699,9 +699,14 @@
             let internetInput = form.internet.value.trim().toLowerCase();
             let healthInput = form.health.value.trim().toLowerCase();
 
-            // School Name: Accept any text value, do not restrict to allowedSchools
+            // School Name: Accept any non-empty text value, no numbers allowed
             if (!schoolInput) {
                 alert('Please enter a School Name.');
+                form.school.style.borderColor = '#e74c3c';
+                form.school.focus();
+                return false;
+            } else if (/\d/.test(form.school.value)) {
+                alert('School Name should not contain numbers.');
                 form.school.style.borderColor = '#e74c3c';
                 form.school.focus();
                 return false;
@@ -709,8 +714,14 @@
                 form.school.style.borderColor = '#27ae60';
             }
 
-            if (!allowedGenders.includes(genderInput)) {
-                alert('Invalid Gender! Allowed: Male, Female, Other.');
+            // Gender: Accept any non-empty text value, no numbers allowed
+            if (!genderInput) {
+                alert('Please enter a Gender.');
+                form.sex.style.borderColor = '#e74c3c';
+                form.sex.focus();
+                return false;
+            } else if (/\d/.test(form.sex.value)) {
+                alert('Gender should not contain numbers.');
                 form.sex.style.borderColor = '#e74c3c';
                 form.sex.focus();
                 return false;
@@ -718,8 +729,14 @@
                 form.sex.style.borderColor = '#27ae60';
             }
 
-            if (!allowedAddresses.includes(addressInput)) {
-                alert('Invalid Address! Allowed: Urban, Rural, Suburban.');
+            // Address Type: Accept any non-empty text value, no numbers allowed
+            if (!addressInput) {
+                alert('Please enter an Address Type.');
+                form.address.style.borderColor = '#e74c3c';
+                form.address.focus();
+                return false;
+            } else if (/\d/.test(form.address.value)) {
+                alert('Address Type should not contain numbers.');
                 form.address.style.borderColor = '#e74c3c';
                 form.address.focus();
                 return false;
@@ -727,8 +744,14 @@
                 form.address.style.borderColor = '#27ae60';
             }
 
-            if (!allowedFamsup.includes(famsupInput)) {
-                alert('Invalid Family Educational Support! Allowed: Yes, No, Limited.');
+            // Family Educational Support: Accept any non-empty text value, no numbers allowed
+            if (!famsupInput) {
+                alert('Please enter Family Educational Support.');
+                form.famsup.style.borderColor = '#e74c3c';
+                form.famsup.focus();
+                return false;
+            } else if (/\d/.test(form.famsup.value)) {
+                alert('Family Educational Support should not contain numbers.');
                 form.famsup.style.borderColor = '#e74c3c';
                 form.famsup.focus();
                 return false;
@@ -736,8 +759,14 @@
                 form.famsup.style.borderColor = '#27ae60';
             }
 
-            if (!allowedPaid.includes(paidInput)) {
-                alert('Invalid Extra Paid Class! Allowed: Yes, No, Occasionally.');
+            // Extra Paid Classes: Accept any non-empty text value, no numbers allowed
+            if (!paidInput) {
+                alert('Please enter Extra Paid Classes.');
+                form.paid.style.borderColor = '#e74c3c';
+                form.paid.focus();
+                return false;
+            } else if (/\d/.test(form.paid.value)) {
+                alert('Extra Paid Classes should not contain numbers.');
                 form.paid.style.borderColor = '#e74c3c';
                 form.paid.focus();
                 return false;
@@ -745,8 +774,14 @@
                 form.paid.style.borderColor = '#27ae60';
             }
 
-            if (!allowedActivities.includes(activitiesInput)) {
-                alert('Invalid Activity! Allowed: Sports, Music, Art, None.');
+            // Extra-curricular Activities: Accept any non-empty text value, no numbers allowed
+            if (!activitiesInput) {
+                alert('Please enter Extra-curricular Activities.');
+                form.activities.style.borderColor = '#e74c3c';
+                form.activities.focus();
+                return false;
+            } else if (/\d/.test(form.activities.value)) {
+                alert('Extra-curricular Activities should not contain numbers.');
                 form.activities.style.borderColor = '#e74c3c';
                 form.activities.focus();
                 return false;
@@ -754,8 +789,14 @@
                 form.activities.style.borderColor = '#27ae60';
             }
 
-            if (!allowedHigher.includes(higherInput)) {
-                alert('Invalid Higher Education Option! Allowed: Yes, No, Undecided.');
+            // Wants Higher Education: Accept any non-empty text value, no numbers allowed
+            if (!higherInput) {
+                alert('Please enter Wants Higher Education.');
+                form.higher.style.borderColor = '#e74c3c';
+                form.higher.focus();
+                return false;
+            } else if (/\d/.test(form.higher.value)) {
+                alert('Wants Higher Education should not contain numbers.');
                 form.higher.style.borderColor = '#e74c3c';
                 form.higher.focus();
                 return false;
@@ -763,8 +804,14 @@
                 form.higher.style.borderColor = '#27ae60';
             }
 
-            if (!allowedInternet.includes(internetInput)) {
-                alert('Invalid Internet Option! Allowed: Yes, No, Limited.');
+            // Internet Access at Home: Accept any non-empty text value, no numbers allowed
+            if (!internetInput) {
+                alert('Please enter Internet Access at Home.');
+                form.internet.style.borderColor = '#e74c3c';
+                form.internet.focus();
+                return false;
+            } else if (/\d/.test(form.internet.value)) {
+                alert('Internet Access at Home should not contain numbers.');
                 form.internet.style.borderColor = '#e74c3c';
                 form.internet.focus();
                 return false;
@@ -772,8 +819,14 @@
                 form.internet.style.borderColor = '#27ae60';
             }
 
-            if (!allowedHealth.includes(healthInput)) {
-                alert('Invalid Health Status! Allowed: Excellent, Good, Fair, Poor.');
+            // Current Health Status: Accept any non-empty text value, no numbers allowed
+            if (!healthInput) {
+                alert('Please enter Current Health Status.');
+                form.health.style.borderColor = '#e74c3c';
+                form.health.focus();
+                return false;
+            } else if (/\d/.test(form.health.value)) {
+                alert('Current Health Status should not contain numbers.');
                 form.health.style.borderColor = '#e74c3c';
                 form.health.focus();
                 return false;
@@ -838,35 +891,94 @@
         function addInputValidation() {
             const form = document.getElementById('prediction-form');
 
-            // School Name: accept any non-empty value
+            // School Name: accept any non-empty text value, no numbers allowed
             const schoolInputEl = form['school'];
             schoolInputEl.addEventListener('input', () => {
-                if (schoolInputEl.value.trim()) {
+                if (schoolInputEl.value.trim() && !/\d/.test(schoolInputEl.value)) {
                     schoolInputEl.style.borderColor = '#27ae60';
                 } else {
                     schoolInputEl.style.borderColor = '#e74c3c';
                 }
             });
 
-            // Other option-based text fields validation
-            [
-                { field: 'sex', allowed: allowedGenders },
-                { field: 'address', allowed: allowedAddresses },
-                { field: 'famsup', allowed: allowedFamsup },
-                { field: 'paid', allowed: allowedPaid },
-                { field: 'activities', allowed: allowedActivities },
-                { field: 'higher', allowed: allowedHigher },
-                { field: 'internet', allowed: allowedInternet },
-                { field: 'health', allowed: allowedHealth }
-            ].forEach(({ field, allowed }) => {
-                const inputEl = form[field];
-                inputEl.addEventListener('input', () => {
-                    if (allowed.includes(inputEl.value.trim().toLowerCase())) {
-                        inputEl.style.borderColor = '#27ae60';
-                    } else {
-                        inputEl.style.borderColor = '#e74c3c';
-                    }
-                });
+            // Gender: accept any non-empty text value, no numbers allowed
+            const genderInputEl = form['sex'];
+            genderInputEl.addEventListener('input', () => {
+                if (genderInputEl.value.trim() && !/\d/.test(genderInputEl.value)) {
+                    genderInputEl.style.borderColor = '#27ae60';
+                } else {
+                    genderInputEl.style.borderColor = '#e74c3c';
+                }
+            });
+
+            // Address Type: accept any non-empty text value, no numbers allowed
+            const addressInputEl = form['address'];
+            addressInputEl.addEventListener('input', () => {
+                if (addressInputEl.value.trim() && !/\d/.test(addressInputEl.value)) {
+                    addressInputEl.style.borderColor = '#27ae60';
+                } else {
+                    addressInputEl.style.borderColor = '#e74c3c';
+                }
+            });
+
+            // Family Educational Support: accept any non-empty text value, no numbers allowed
+            const famsupInputEl = form['famsup'];
+            famsupInputEl.addEventListener('input', () => {
+                if (famsupInputEl.value.trim() && !/\d/.test(famsupInputEl.value)) {
+                    famsupInputEl.style.borderColor = '#27ae60';
+                } else {
+                    famsupInputEl.style.borderColor = '#e74c3c';
+                }
+            });
+
+            // Extra Paid Classes: accept any non-empty text value, no numbers allowed
+            const paidInputEl = form['paid'];
+            paidInputEl.addEventListener('input', () => {
+                if (paidInputEl.value.trim() && !/\d/.test(paidInputEl.value)) {
+                    paidInputEl.style.borderColor = '#27ae60';
+                } else {
+                    paidInputEl.style.borderColor = '#e74c3c';
+                }
+            });
+
+            // Extra-curricular Activities: accept any non-empty text value, no numbers allowed
+            const activitiesInputEl = form['activities'];
+            activitiesInputEl.addEventListener('input', () => {
+                if (activitiesInputEl.value.trim() && !/\d/.test(activitiesInputEl.value)) {
+                    activitiesInputEl.style.borderColor = '#27ae60';
+                } else {
+                    activitiesInputEl.style.borderColor = '#e74c3c';
+                }
+            });
+
+            // Wants Higher Education: accept any non-empty text value, no numbers allowed
+            const higherInputEl = form['higher'];
+            higherInputEl.addEventListener('input', () => {
+                if (higherInputEl.value.trim() && !/\d/.test(higherInputEl.value)) {
+                    higherInputEl.style.borderColor = '#27ae60';
+                } else {
+                    higherInputEl.style.borderColor = '#e74c3c';
+                }
+            });
+
+            // Internet Access at Home: accept any non-empty text value, no numbers allowed
+            const internetInputEl = form['internet'];
+            internetInputEl.addEventListener('input', () => {
+                if (internetInputEl.value.trim() && !/\d/.test(internetInputEl.value)) {
+                    internetInputEl.style.borderColor = '#27ae60';
+                } else {
+                    internetInputEl.style.borderColor = '#e74c3c';
+                }
+            });
+
+            // Current Health Status: accept any non-empty text value, no numbers allowed
+            const healthInputEl = form['health'];
+            healthInputEl.addEventListener('input', () => {
+                if (healthInputEl.value.trim() && !/\d/.test(healthInputEl.value)) {
+                    healthInputEl.style.borderColor = '#27ae60';
+                } else {
+                    healthInputEl.style.borderColor = '#e74c3c';
+                }
             });
 
             // Number inputs validation
